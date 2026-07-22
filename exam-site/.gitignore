@@ -1,0 +1,11 @@
+backend/.env
+backend/**/__pycache__/
+backend/**/*.pyc
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/*.tsbuildinfo
+frontend/test-results/
+frontend/playwright-report/
+*.tsd-backup
+*-dev.*.log

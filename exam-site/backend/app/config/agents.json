@@ -1,0 +1,32 @@
+{
+  "title": "AI训练师初赛题库 - 智能答题平台",
+  "description": "基于AI Multi-Agent技术的智能答题与学习分析平台",
+  "version": "1.0.0",
+  "agents": {
+    "summarizer": {
+      "name": "知识总结Agent",
+      "role": "对题目知识点进行全面总结归纳，生成知识卡片",
+      "capabilities": ["章节总结", "知识点归纳", "知识卡片生成"]
+    },
+    "explainer": {
+      "name": "题目解析Agent",
+      "role": "对每道题进行详细解析，解释正确/错误原因",
+      "capabilities": ["答案解析", "知识点关联", "易错点提醒"]
+    },
+    "analyzer": {
+      "name": "学习分析Agent",
+      "role": "分析用户答题数据，发现薄弱知识点",
+      "capabilities": ["薄弱点识别", "学习建议", "知识地图构建"]
+    },
+    "predictor": {
+      "name": "考点预测Agent",
+      "role": "基于题目分布规律预测高频考点",
+      "capabilities": ["高频考点", "出题规律", "复习重点推荐"]
+    },
+    "planner": {
+      "name": "学习规划Agent",
+      "role": "根据用户水平和目标制定个性化学习计划",
+      "capabilities": ["学习计划", "时间管理", "进度跟踪"]
+    }
+  }
+}

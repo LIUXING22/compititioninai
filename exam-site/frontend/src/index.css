@@ -1,0 +1,125 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-slate-50 text-slate-800 antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5
+           bg-primary-600 text-white font-medium rounded-xl
+           hover:bg-primary-700 active:bg-primary-800
+           transition-all duration-200 shadow-md hover:shadow-lg
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5
+           bg-white text-slate-700 font-medium rounded-xl
+           border border-slate-200 hover:border-primary-300 hover:text-primary-600
+           transition-all duration-200 shadow-sm hover:shadow
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ai {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5
+           bg-gradient-to-r from-ai-500 to-emerald-400 text-white font-medium rounded-xl
+           hover:from-ai-600 hover:to-emerald-500
+           transition-all duration-200 shadow-md hover:shadow-lg;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl shadow-sm border border-slate-100
+           hover:shadow-md transition-shadow duration-200;
+  }
+
+  .card-hover {
+    @apply card hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200;
+  }
+
+  .option-btn {
+    @apply w-full text-left px-4 py-3 rounded-xl border-2
+           transition-all duration-200 cursor-pointer select-none;
+  }
+
+  .option-btn-default {
+    @apply option-btn border-slate-200 bg-white hover:border-primary-400
+           hover:bg-primary-50;
+  }
+
+  .option-btn-selected {
+    @apply option-btn border-primary-500 bg-primary-50 text-primary-700;
+  }
+
+  .option-btn-correct {
+    @apply option-btn border-green-500 bg-green-50 text-green-700;
+  }
+
+  .option-btn-wrong {
+    @apply option-btn border-red-500 bg-red-50 text-red-700;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full
+           text-xs font-medium;
+  }
+
+  .sidebar-link {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl
+           text-slate-600 hover:bg-slate-100 hover:text-slate-900
+           transition-all duration-200 cursor-pointer;
+  }
+
+  .sidebar-link-active {
+    @apply sidebar-link bg-primary-50 text-primary-700 font-medium;
+  }
+
+  .glass-panel {
+    @apply bg-white/80 backdrop-blur-xl border border-white/50 shadow-xl;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-600 to-ai-600 bg-clip-text text-transparent;
+  }
+
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(255,255,255,0) 0%,
+      rgba(255,255,255,0.4) 50%,
+      rgba(255,255,255,0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+}
