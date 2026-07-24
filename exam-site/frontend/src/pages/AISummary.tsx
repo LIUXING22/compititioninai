@@ -37,6 +37,7 @@ export default function AISummary() {
   const [predictionMode, setPredictionMode] = useState<PredictionMode>('high_frequency')
   const [activeTab, setActiveTab] = useState<'summary' | 'prediction' | 'plan'>('summary')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [summaryData, setSummaryData] = useState<any>(null)
   const [predictionData, setPredictionData] = useState<any>(null)
   const [planData, setPlanData] = useState<any>(null)
@@ -52,10 +53,14 @@ export default function AISummary() {
 
   const handleSummary = async () => {
     setLoading(true)
+    setError(null)
     setSummaryData(null)
     try {
       const res = await aiSummarize(summaryMode)
       setSummaryData(res.data)
+    } catch (e: any) {
+      console.error('AI Summary error:', e)
+      setError(e?.message || 'AI总结请求失败')
     } finally {
       setLoading(false)
     }
@@ -63,10 +68,14 @@ export default function AISummary() {
 
   const handlePrediction = async () => {
     setLoading(true)
+    setError(null)
     setPredictionData(null)
     try {
       const res = await aiPredict(predictionMode)
       setPredictionData(res.data)
+    } catch (e: any) {
+      console.error('AI Predict error:', e)
+      setError(e?.message || 'AI预测请求失败')
     } finally {
       setLoading(false)
     }
@@ -74,10 +83,14 @@ export default function AISummary() {
 
   const handlePlan = async () => {
     setLoading(true)
+    setError(null)
     setPlanData(null)
     try {
       const res = await aiPlan('exam_prep', planParams.exam_date, planParams.daily_minutes, planParams.current_level)
       setPlanData(res.data)
+    } catch (e: any) {
+      console.error('AI Plan error:', e)
+      setError(e?.message || 'AI规划请求失败')
     } finally {
       setLoading(false)
     }
@@ -102,11 +115,36 @@ export default function AISummary() {
       )
     }
 
+    if (error) {
+      return (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700">
+          <strong>请求失败：</strong>{error}
+        </div>
+      )
+    }
+
     if (!summaryData) {
       return (
         <div className="text-center py-20 text-slate-400">
           <Brain className="w-12 h-12 mx-auto mb-3 opacity-30" />
           <p>点击上方模式开始AI总结</p>
+        </div>
+      )
+    }
+
+    // Guard: if data doesn't have expected structure, show raw data
+    const hasTopics = Array.isArray(summaryData.topics)
+    const hasChapters = Array.isArray(summaryData.chapters)
+    const hasNodes = Array.isArray(summaryData.nodes)
+    const hasCards = Array.isArray(summaryData.cards)
+
+    if (summaryMode === 'topic_analysis' && !hasTopics) {
+      return (
+        <div className="text-center py-10 text-slate-400">
+          <p>未获取到知识点数据</p>
+          <pre className="text-xs mt-2 bg-slate-50 rounded p-3 text-left overflow-auto max-h-40">
+            {JSON.stringify(summaryData, null, 2).slice(0, 300)}
+          </pre>
         </div>
       )
     }
@@ -478,6 +516,13 @@ export default function AISummary() {
           ))}
         </div>
       </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700">
+          <strong>AI请求失败：</strong>{error}
+          <button className="ml-3 text-red-500 underline text-xs" onClick={() => setError(null)}>关闭</button>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex border-b border-slate-200">

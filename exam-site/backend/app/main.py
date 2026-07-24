@@ -364,7 +364,7 @@ async def ai_explain(body: Dict[str, Any]):
 
     result = await explain_wrong_answer(question, user_answer)
     return {
-        "agent": "openai_explainer" if result["data"]["source"] == "openai" else "local_explainer",
+        "agent": "cloud_explainer" if result["data"].get("source") == "cloud" else "local_explainer",
         **result,
     }
 

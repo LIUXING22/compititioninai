@@ -21,10 +21,11 @@ def _build_questions_index(questions: List[Dict]) -> Dict[int, Dict]:
 
 def load_questions() -> List[Dict[str, Any]]:
     """Load all questions from JSON file."""
-    global _questions_cache
+    global _questions_cache, _questions_by_id
     if _questions_cache is None:
         with open(QUESTIONS_PATH, encoding="utf-8") as f:
             _questions_cache = json.load(f)
+        _questions_by_id = _build_questions_index(_questions_cache)
     return _questions_cache
 
 

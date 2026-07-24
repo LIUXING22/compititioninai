@@ -43,6 +43,7 @@ export default function Analytics() {
   const [analysis, setAnalysis] = useState<any>(null)
   const [fullAnalysis, setFullAnalysis] = useState<any>(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'overview' | 'weak' | 'full'>('overview')
 
   useEffect(() => {
@@ -51,6 +52,7 @@ export default function Analytics() {
 
   const runAnalysis = async (mode = 'full_analysis') => {
     setLoading(true)
+    setError(null)
     try {
       const res = await aiAnalyze(mode, [
         { question_id: 1, is_correct: true, timestamp: '2026-07-20T10:00:00' },
@@ -60,6 +62,9 @@ export default function Analytics() {
         { question_id: 5, is_correct: false, timestamp: '2026-07-22T08:00:00' },
       ])
       setAnalysis(res.data)
+    } catch (e: any) {
+      console.error('AI Analyze error:', e)
+      setError(e?.message || 'AI分析请求失败')
     } finally {
       setLoading(false)
     }
@@ -67,9 +72,13 @@ export default function Analytics() {
 
   const runFullAnalysis = async () => {
     setLoading(true)
+    setError(null)
     try {
       const res = await aiFullAnalysis({})
       setFullAnalysis(res)
+    } catch (e: any) {
+      console.error('AI FullAnalysis error:', e)
+      setError(e?.message || 'AI全部分析请求失败')
     } finally {
       setLoading(false)
     }
@@ -127,6 +136,11 @@ export default function Analytics() {
             <><RefreshCw className="w-4 h-4" /> AI分析</>
           )}
         </button>
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-2 text-sm text-red-700">
+            {error}
+          </div>
+        )}
       </div>
 
       {/* Overview Stats */}

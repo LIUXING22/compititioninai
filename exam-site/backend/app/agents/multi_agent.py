@@ -217,23 +217,27 @@ class KnowledgeSummarizerAgent(BaseAgent):
         """Generate flashcard-style knowledge cards."""
         cards = []
         for q in questions:
-            if q["type"] == "truefalse":
-                cards.append({
-                    "type": "card",
-                    "front": q["question"],
-                    "back": f"{'正确' if q['answer'] == 'A' else '错误'}",
-                    "topic": self._classify_topic(q["question"]),
-                })
-            else:
-                correct_text = " / ".join(
-                    q["options"][k] for k in q["answer"]
-                )
-                cards.append({
-                    "type": "card",
-                    "front": q["question"],
-                    "back": correct_text,
-                    "topic": self._classify_topic(q["question"]),
-                })
+            try:
+                if q["type"] == "truefalse":
+                    cards.append({
+                        "type": "card",
+                        "front": q["question"],
+                        "back": f"{'正确' if q['answer'] == 'A' else '错误'}",
+                        "topic": self._classify_topic(q["question"]),
+                    })
+                else:
+                    correct_opts = [q["options"][k] for k in q["answer"] if k in q.get("options", {})]
+                    if not correct_opts:
+                        continue
+                    correct_text = " / ".join(correct_opts)
+                    cards.append({
+                        "type": "card",
+                        "front": q["question"],
+                        "back": correct_text,
+                        "topic": self._classify_topic(q["question"]),
+                    })
+            except Exception:
+                continue
 
         return {
             "summary_type": "knowledge_cards",
@@ -408,6 +412,10 @@ class AnswerExplainerAgent(BaseAgent):
         question = context.get("question", {})
         user_answers = context.get("user_answers", {})
         qtype = question.get("type", "single")
+
+        # Support both formats: {"answer": "A"} or {"<id>": "A"}
+        if "answer" in user_answers:
+            user_answers = {str(question.get("id", "")): user_answers["answer"]}
 
         explainer = self.explanation_templates.get(qtype, self._explain_single)
         result = explainer(question, user_answers)
@@ -849,12 +857,19 @@ class LearningAnalyzerAgent(BaseAgent):
 
     def _empty_analysis(self) -> Dict:
         return {
+            "analysis_type": "full",
             "overview": {
                 "total_answered": 0,
                 "correct": 0,
+                "incorrect": 0,
                 "score_rate": 0,
                 "grade": "未开始",
             },
+            "by_type": {},
+            "weak_points": [],
+            "strong_points": [],
+            "time_distribution": {"peak_hours": [], "distribution": {}},
+            "trend": {"direction": "unknown", "recent_rate": 0, "overall_rate": 0, "change": 0},
             "suggestions": ["开始答题获取个性化分析"],
         }
 
@@ -874,11 +889,24 @@ class ExamPredictorAgent(BaseAgent):
         mode = context.get("mode", "full_prediction")
 
         if mode == "high_frequency":
-            return self._predict_high_frequency(questions)
+            return {
+                "prediction_type": "high_frequency",
+                "high_frequency": self._predict_high_frequency(questions),
+                "key_points": self._extract_key_points_for_exam(questions),
+            }
         elif mode == "key_points":
-            return self._extract_key_points_for_exam(questions)
+            return {
+                "prediction_type": "key_points",
+                "high_frequency": self._predict_high_frequency(questions),
+                "key_points": self._extract_key_points_for_exam(questions),
+            }
         elif mode == "review_plan":
-            return self._generate_review_plan(questions)
+            return {
+                "prediction_type": "review_plan",
+                "high_frequency": self._predict_high_frequency(questions),
+                "key_points": self._extract_key_points_for_exam(questions),
+                "review_plan": self._generate_review_plan(questions),
+            }
         else:
             return self._full_prediction(questions)
 
