@@ -1,0 +1,15 @@
+# 忽略文件
+node_modules/
+dist/
+*.pyc
+__pycache__/
+.env.local
+*.tsd-backup
+.git/
+
+# 需要保留的关键文件
+!backend/
+!frontend/
+!doc/
+!docker-compose.yml
+!.env
