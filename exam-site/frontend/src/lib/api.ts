@@ -1,5 +1,8 @@
 import axios from 'axios';
 import type {
+  ChatMessage,
+  ChatResponse,
+  ChatSource,
   ExamConfig,
   ExamQuestion,
   ExamResult,
@@ -14,6 +17,9 @@ import type {
 
 export type {
   AgentInfo,
+  ChatMessage,
+  ChatResponse,
+  ChatSource,
   ExamConfig,
   ExamQuestion,
   ExamResult,
@@ -300,12 +306,6 @@ export async function getAnalyticsDashboard(examRecords: unknown[] = []) {
 }
 
 // ── RAG Chat ───────────────────────────────────────────────────────────────
-
-export type {
-  ChatSource,
-  ChatMessage,
-  ChatResponse,
-} from '../types';
 
 export async function sendChatMessage(
   message: string,
