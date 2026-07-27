@@ -1,7 +1,8 @@
-version: '3.8'
+# ── 后端 ─────────────────────────────────────────────────────
+# 启动: docker compose up -d backend
+# 停止: docker compose down
 
 services:
-  # ── 后端 FastAPI ──────────────────────────────────────────
   backend:
     build:
       context: ./backend
@@ -15,30 +16,11 @@ services:
       - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.stepfun.com/step_plan/v1}
       - OPENAI_TIMEOUT_SECONDS=${OPENAI_TIMEOUT_SECONDS:-30}
     volumes:
-      # 挂载文档目录（方便更新文档）
       - ./doc:/doc
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 15s
-
-  # ── 前端 Nginx ────────────────────────────────────────────
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: exam-frontend
-    ports:
-      - "80:80"
-    depends_on:
-      backend:
-        condition: service_healthy
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:80/"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
+      start_period: 20s
