@@ -1200,6 +1200,36 @@ class StudyPlannerAgent(BaseAgent):
         ]
 
 
+class RAGChatAgent(BaseAgent):
+    """
+    RAG-powered conversational agent.
+    Searches document chunks and questions via vector store,
+    then generates AI-powered responses using configured LLM.
+    """
+
+    def __init__(self):
+        super().__init__("RAGChatAgent", "文档问答专家")
+        self.capabilities = ["文档检索", "智能问答", "知识解答", "备考辅导"]
+
+    async def _run(self, context: Dict) -> Dict:
+        message = context.get("message", "")
+        history = context.get("history", [])
+
+        if not message:
+            return {"reply": "请输入你的问题", "sources": [], "context_used": False}
+
+        try:
+            from app.services.rag_service import rag_chat
+            result = await rag_chat(message, history)
+            return result
+        except Exception as e:
+            return {
+                "reply": f"AI助手暂时不可用: {str(e)[:100]}",
+                "sources": [],
+                "context_used": False,
+            }
+
+
 class AgentOrchestrator:
     """
     Coordinates multiple AI agents.
@@ -1213,6 +1243,7 @@ class AgentOrchestrator:
             "analyzer": LearningAnalyzerAgent(),
             "predictor": ExamPredictorAgent(),
             "planner": StudyPlannerAgent(),
+            "rag_chat": RAGChatAgent(),
         }
         self.message_queue: List[Message] = []
         self.execution_log: List[Dict] = []

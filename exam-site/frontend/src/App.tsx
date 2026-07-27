@@ -23,6 +23,9 @@ import Analytics from './pages/Analytics'
 import KnowledgeMap from './pages/KnowledgeMap'
 import FlashcardsPage from './pages/Flashcards'
 
+// RAG Chat Widget
+import ChatWidget from './components/ChatWidget'
+
 const NAV_ITEMS = [
   { path: '/', icon: LayoutDashboard, label: '首页' },
   { path: '/exam', icon: PenLine, label: '模拟考试' },
@@ -147,6 +150,9 @@ export default function App() {
           </Routes>
         </div>
       </main>
+
+      {/* Global RAG Chat Widget - available on all pages */}
+      <ChatWidget />
     </div>
   )
 }

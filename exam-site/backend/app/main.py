@@ -7,6 +7,7 @@ import random
 import time
 from contextlib import asynccontextmanager
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI, HTTPException
@@ -50,6 +51,32 @@ orchestrator_instance: Optional[AgentOrchestrator] = None
 async def lifespan(app: FastAPI):
     """Application startup and shutdown."""
     global orchestrator_instance
+
+    # Build document index at startup
+    print("[Startup] Building RAG document index...")
+    try:
+        from app.services.document_parser import load_all_documents, build_question_chunks
+        from app.services.embedding_service import get_vector_store
+
+        store = get_vector_store()
+        doc_dir = str(Path(__file__).resolve().parent.parent.parent.parent / "doc")
+
+        # Parse and index documents
+        doc_chunks = load_all_documents(doc_dir)
+        store.add_documents(doc_chunks)
+
+        # Index questions
+        questions = load_questions()
+        q_chunks = build_question_chunks(questions)
+        store.add_question_chunks(q_chunks)
+
+        stats = store.get_stats()
+        print(f"[Startup] RAG index ready: {stats['total_documents']} doc chunks + "
+              f"{stats['total_question_chunks']} question chunks, "
+              f"{stats['unique_terms']} unique terms")
+    except Exception as e:
+        print(f"[Startup] WARNING: RAG index build failed: {e}")
+
     orchestrator_instance = AgentOrchestrator()
     yield
     orchestrator_instance = None
@@ -510,6 +537,62 @@ async def ai_exam_help(body: Dict[str, Any]):
 
     result = await orchestrator_instance.execute_exam_help(question, user_answer)
     return result
+
+
+# ── RAG Chat Endpoints ──────────────────────────────────────────────────
+
+@app.get("/api/chat/sources")
+async def get_chat_sources():
+    """List indexed document sources for RAG chat."""
+    try:
+        from app.services.embedding_service import get_vector_store
+        store = get_vector_store()
+        return store.get_stats()
+    except Exception as e:
+        return {"error": str(e), "total_documents": 0}
+
+
+@app.post("/api/chat")
+async def rag_chat_endpoint(body: Dict[str, Any]):
+    """
+    RAG-powered chat endpoint (non-streaming).
+    Body: { "message": str, "history": List[dict] | None }
+    """
+    message = body.get("message", "").strip()
+    if not message:
+        raise HTTPException(status_code=400, detail="message required")
+
+    history = body.get("history", None)
+    top_k_docs = body.get("top_k_docs", 5)
+    top_k_questions = body.get("top_k_questions", 3)
+
+    from app.services.rag_service import rag_chat
+    result = await rag_chat(message, history, top_k_docs, top_k_questions)
+    return result
+
+
+@app.post("/api/chat/stream")
+async def rag_chat_stream_endpoint(body: Dict[str, Any]):
+    """
+    RAG-powered chat endpoint (SSE streaming).
+    Body: { "message": str, "history": List[dict] | None }
+    """
+    message = body.get("message", "").strip()
+    if not message:
+        raise HTTPException(status_code=400, detail="message required")
+
+    history = body.get("history", None)
+    top_k_docs = body.get("top_k_docs", 5)
+    top_k_questions = body.get("top_k_questions", 3)
+
+    from app.services.rag_service import rag_chat_stream
+    from sse_starlette.sse import EventSourceResponse
+
+    async def event_generator():
+        async for chunk in rag_chat_stream(message, history, top_k_docs, top_k_questions):
+            yield {"event": "message", "data": chunk}
+
+    return EventSourceResponse(event_generator())
 
 
 # ── Knowledge Card Endpoints ────────────────────────────────────────────────

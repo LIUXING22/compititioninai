@@ -117,3 +117,29 @@ export interface StudyPlan {
   daily_plans: StudyPlanDay[];
   milestones: { day: number; milestone: string; checkpoint: string }[];
 }
+
+// Chat RAG types
+export interface ChatSource {
+  chunk_id: string;
+  source: string;
+  relevance: number;
+  excerpt: string;
+  question_id?: number;
+  question_type?: string;
+}
+
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  sources?: ChatSource[];
+  timestamp?: string;
+}
+
+export interface ChatResponse {
+  reply: string;
+  sources: ChatSource[];
+  context_used: boolean;
+  model: string | null;
+  execution_time_ms: number;
+  error?: string;
+}

@@ -298,3 +298,24 @@ export async function getAnalyticsDashboard(examRecords: unknown[] = []) {
   });
   return data;
 }
+
+// ── RAG Chat ───────────────────────────────────────────────────────────────
+
+export type {
+  ChatSource,
+  ChatMessage,
+  ChatResponse,
+} from '../types';
+
+export async function sendChatMessage(
+  message: string,
+  history: ChatMessage[] = [],
+): Promise<ChatResponse> {
+  const { data } = await api.post('/chat', { message, history });
+  return data;
+}
+
+export async function getChatSources() {
+  const { data } = await api.get('/chat/sources');
+  return data;
+}
